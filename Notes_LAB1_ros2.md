@@ -43,3 +43,5 @@ fatal error you are behind - preguntar al chat
 git permet fer arxius dos a la vegada femnt branques. MAI MAI dos personas a la mateixa vegada al mateix arxiu si dos persones han fet una mateixa mod al mateix arxiu obrira una branca -> problema no sabem treballar amb branques 
 
 CANVIS PER FER 
+
+Lo siento, no volverá a passar
