@@ -45,3 +45,5 @@ git permet fer arxius dos a la vegada femnt branques. MAI MAI dos personas a la 
 CANVIS PER FER 
 
 Lo siento, no volverá a passar
+
+Prova de modificacions
