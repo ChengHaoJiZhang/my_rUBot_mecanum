@@ -1,0 +1,18 @@
+# Group 1 — Obstacle avoidance and waypoint navigation
+# Pose format: [x, y, yaw] in the map frame
+# Coordinates in metres, yaw in radians
+
+initial_pose: [0.0, 0.0, 0.0]
+
+waypoints:
+  # Above internal_1 (horizontal wall)
+  - [-1.0, 1.55, 0.0]
+
+  # Below internal_1: robot must go around the wall
+  - [-1.0, 0.15, 0.0]
+
+  # Left of internal_2 (vertical wall)
+  - [0.30, -1.0, 0.0]
+
+# Right of internal_2: robot must go around the wall
+final_pose: [1.50, -1.0, 0.0]
