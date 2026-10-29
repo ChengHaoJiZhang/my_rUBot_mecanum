@@ -459,7 +459,7 @@ class HolonomicObstacleWallFollower(Node):
         else:
             # Move diagonally forward-right.
             cmd.linear.y = (
-                -self.lateral_speed * self.diagonal_factor
+                -5*self.lateral_speed * self.diagonal_factor # original -self.lateral_speed * self.diagonal_factor
             )
 
         # Keep the robot's orientation unchanged.
