@@ -12,15 +12,15 @@ class RobotWallFollower(Node):
         super().__init__('robot_wall_follower_holonomic_node')
 
         # Parameters
-        self.declare_parameter('follow_distance', 0.35)
+        self.declare_parameter('right_detection_limit', 1.0)  # original 1.0
+        self.declare_parameter('follow_distance', 0.35) # original 0.35
         self.declare_parameter('forward_speed', 0.30)
         self.declare_parameter('turn_speed', 0.50)
         self.declare_parameter('tolerance', 0.05)
-        self.declare_parameter('right_detection_limit', 1.0)
-        self.declare_parameter('lateral_gain', 0.5)
+        self.declare_parameter('lateral_gain', 0.5) # original 0.5
         self.declare_parameter('alignment_gain', 0.5)
         self.declare_parameter('max_lateral_speed', 0.40)
-        self.declare_parameter('max_angular_speed', 1.00)
+        self.declare_parameter('max_angular_speed', 1.00) # original 1.00
         self.declare_parameter('back_right_limit_factor', 1.50)
 
         self.follow_distance = float(self.get_parameter('follow_distance').value)
