@@ -6,7 +6,7 @@ import rclpy
 from rclpy.node import Node
 from nav2_simple_commander.robot_navigator import BasicNavigator
 from geometry_msgs.msg import PoseStamped
-import tf_transformations
+from math import sin, cos
 
 
 class NavigationTask(Node):
@@ -47,7 +47,7 @@ class NavigationTask(Node):
         return initial_pose, waypoints, final_pose
 
     def _create_pose_stamped(self, x, y, yaw):
-        q_x, q_y, q_z, q_w = tf_transformations.quaternion_from_euler(0.0, 0.0, yaw)
+        q_x, q_y, q_z, q_w = 0.0, 0.0, sin(yaw / 2.0), cos(yaw / 2.0)
 
         pose = PoseStamped()
         pose.header.frame_id = 'map'

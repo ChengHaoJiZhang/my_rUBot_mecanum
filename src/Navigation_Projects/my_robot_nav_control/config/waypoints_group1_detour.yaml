@@ -16,3 +16,8 @@ waypoints:
 
 # Right of internal_2: robot must go around the wall
 final_pose: [1.50, -1.0, 0.0]
+
+
+
+
+
