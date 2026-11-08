@@ -5,8 +5,8 @@ import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import PoseStamped
 from std_msgs.msg import String
-from nav2_simple_commander.robot_navigator import BasicNavigator
-from tf_transformations import quaternion_from_euler
+from nav2_simple_commander.robot_navigator import BasicNavigator, TaskResult
+from math import sin, cos
 
 
 class TrafficSignNavigation(Node):
@@ -40,14 +40,20 @@ class TrafficSignNavigation(Node):
             10
         )       
 
+
     def sign_callback(self, msg):
-        # TODO 2: Store the detected sign in lower case.
         if self.accept_sign:
-            self.detected_sign = msg.data.lower()
+            self.detected_sign = msg.data.strip().lower()
+            self.get_logger().info(
+                f'TRAFFIC SIGN RECEIVED: {self.detected_sign}'
+            )
 
     def create_pose(self, values):
         x, y, yaw = values
-        qx, qy, qz, qw = quaternion_from_euler(0.0, 0.0, yaw)
+        qx = 0.0
+        qy = 0.0
+        qz = sin(yaw / 2.0)
+        qw = cos(yaw / 2.0)
 
         pose = PoseStamped()
         pose.header.frame_id = 'map'
@@ -60,31 +66,82 @@ class TrafficSignNavigation(Node):
         pose.pose.orientation.w = qw
         return pose
 
+
     def go_to(self, values, name):
-        self.get_logger().info(f'Going to {name}')
+        self.get_logger().info(f'Going to {name}: {values}')
+
         self.navigator.goToPose(self.create_pose(values))
 
-        while not self.navigator.isTaskComplete():
+        while rclpy.ok() and not self.navigator.isTaskComplete():
             rclpy.spin_once(self, timeout_sec=0.1)
+
+        if not rclpy.ok():
+            return False
+
+        result = self.navigator.getResult()
+
+        if result == TaskResult.SUCCEEDED:
+            self.get_logger().info(f'SUCCESS: {name}')
+            return True
+
+        self.get_logger().error(
+            f'FAILED: {name}, Nav2 result: {result}'
+        )
+        return False
+
 
     def wait_for_sign(self):
         self.detected_sign = None
         self.accept_sign = True
-        self.get_logger().info('Waiting for a traffic sign on /traffic_sign ...')
 
-        # TODO 3: Process callbacks until detected_sign is not None.
+        self.get_logger().info(
+            'Waiting for a traffic sign on /traffic_sign ...'
+        )
 
-        self.accept_sign = False
+        try:
+            while rclpy.ok() and self.detected_sign is None:
+                rclpy.spin_once(self, timeout_sec=0.1)
+        finally:
+            self.accept_sign = False
+
         return self.detected_sign
 
+
     def run(self):
-        self.navigator.setInitialPose(self.create_pose(self.initial_pose))
+        self.navigator.setInitialPose(
+            self.create_pose(self.initial_pose)
+        )
+
         self.navigator.waitUntilNav2Active()
 
-        self.go_to(self.inspection_pose, 'inspection pose')
+        if not self.go_to(self.inspection_pose, 'inspection pose'):
+            self.get_logger().error('Inspection navigation failed')
+            return
+
         sign = self.wait_for_sign()
 
-        # TODO 4: Implement left, right, stop and unknown-sign behaviour.
+        if sign == 'left':
+            self.get_logger().info('LEFT ROUTE SELECTED')
+
+            if self.go_to(self.left_waypoint, 'left waypoint'):
+                self.go_to(self.final_pose, 'final pose')
+
+        elif sign == 'right':
+            self.get_logger().info('RIGHT ROUTE SELECTED')
+
+            if self.go_to(self.right_waypoint, 'right waypoint'):
+                self.go_to(self.final_pose, 'final pose')
+
+        elif sign == 'stop':
+            self.get_logger().info('STOP SIGN DETECTED')
+
+            time.sleep(self.stop_duration)
+            self.go_to(self.final_pose, 'final pose')
+
+        else:
+            self.get_logger().info(
+                f'Unknown sign: {sign}. Staying at inspection pose.'
+            )
 
 
 def main(args=None):
